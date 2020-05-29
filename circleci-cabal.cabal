@@ -1,0 +1,34 @@
+cabal-version:        3.0
+
+name:                 circleci-cabal
+version:              0.1.0.0
+license:              MIT
+license-file:         LICENSE
+author:               Nathaniel May
+maintainer:           nate@nathanielmay.com
+build-type:           Simple
+extra-source-files:   README.md
+
+executable circleci-cabal
+  main-is:            Main.hs
+  build-depends:      base           ==4.13.0.0
+                    , circleci-cabal ==0.1.0.0
+  hs-source-dirs:     src/exe
+  ghc-options:        -Wall
+  default-language:   Haskell2010
+
+library
+  exposed-modules:    Lib
+  build-depends:      base ==4.13.0.0
+  hs-source-dirs:     src/lib
+  default-language:   Haskell2010
+
+test-suite unit
+  type:               exitcode-stdio-1.0
+  hs-source-dirs:     src/test
+  main-is:            UnitTests.hs
+  build-depends:      circleci-cabal ==0.1.0.0
+                    , base           ==4.13.0.0
+                    , HUnit          ==1.6.0.0
+  ghc-options:        -Wall
+  default-language:   Haskell2010
