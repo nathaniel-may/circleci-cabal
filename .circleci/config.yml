@@ -12,9 +12,10 @@ jobs:
       - checkout
         # cache is only used if the cabal file has not changed at all
       - restore_cache:
-          name: Restore Cached Dependencies
-          key: haskell-dependencies-{{ checksum "circleci-cabal.cabal" }}
+          name: Restore Cached Artifacts
+          key: haskell-artifacts-{{ checksum "circleci-cabal.cabal" }}
         # make sure to use the "new" versions of cabal commands
+        # new-update fetches the latest package list from hackage
         # `--lib` is an undocumented flag that installs the current configuration 
         #   and its dependencies without looking for an executable
       - run:
@@ -22,16 +23,16 @@ jobs:
           command: cabal new-update && cabal new-install --lib
         # compile all non-test artifacts
       - run:
-          name: Compile
+          name: Build
           command: cabal new-build
         # compile everything including tests
       - run:
-          name: Compile Tests
+          name: Build Tests
           command: cabal new-build --enable-tests
         # cache the built artifacts even if tests don't pass
       - save_cache:
-          name: Cache Dependencies
-          key: haskell-dependencies-{{ checksum "circleci-cabal.cabal" }}
+          name: Cache Artifacts
+          key: haskell-artifacts-{{ checksum "circleci-cabal.cabal" }}
           paths:
             - "/root/.cabal"  # cabal settings
             - "dist-newstyle" # artifacts
