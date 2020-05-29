@@ -4,24 +4,40 @@ version: 2.1
 jobs:
   build:
     docker:
+        # choose haskell version via the docker image
+        # this image includes cabal 3.2
       - image: haskell:8.8.3
     steps:
+        # checks out code from github
       - checkout
+        # cache is only used if the cabal file has not changed at all
       - restore_cache:
           name: Restore Cached Dependencies
           key: haskell-dependencies-{{ checksum "circleci-cabal.cabal" }}
+        # make sure to use the "new" versions of cabal commands
+        # `--lib` is an undocumented flag that installs the current configuration 
+        #   and its dependencies without looking for an executable
       - run:
           name: Update Dependencies
           command: cabal new-update && cabal new-install --lib
+        # compile all non-test artifacts
       - run:
-          name: Haskell - Compile
+          name: Compile
           command: cabal new-build
+        # compile everything including tests
       - run:
-          name: Haskell - Compile Tests
+          name: Compile Tests
           command: cabal new-build --enable-tests
+        # cache the built artifacts even if tests don't pass
       - save_cache:
-          name: Haskell - Cache Dependencies
+          name: Cache Dependencies
           key: haskell-dependencies-{{ checksum "circleci-cabal.cabal" }}
           paths:
-            - "/root/.cabal"
-            - "dist-newstyle" 
+            - "/root/.cabal"  # cabal settings
+            - "dist-newstyle" # artifacts
+        # run tests via cabal
+        # --test-show-details=streaming allows print lines in tests to reach stdout
+        #   instead of going to a log file. Not available in old versions of cabal.
+      - run:
+          name: Run Tests
+          command: cabal new-test --enable-tests --test-show-details=streaming
